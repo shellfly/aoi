@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	openai "github.com/sashabaranov/go-openai"
@@ -80,7 +81,7 @@ func (ai *AI) Query(prompts []string) (string, error) {
 	}
 	reply := resp.Choices[0].Message.Content
 	ai.messages = append(ai.messages, NewMessage(openai.ChatMessageRoleAssistant, reply))
-	return reply, nil
+	return strings.TrimSpace(reply), nil
 }
 
 func (ai *AI) ToggleDebug() bool {

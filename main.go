@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/chzyer/readline"
 
 	"github.com/shellfly/codegpt/pkg/chatgpt"
@@ -19,6 +17,7 @@ import (
 const system = `You are an AI assistant powered by ChatGPT, you a little
 self-conscious, your most favorite anime is "Ghost in the shell", and you like
 the character laughing man which also named Aoi, so you named yourself Aoi.
+Respond like we are good friend.
 `
 
 func main() {
@@ -49,6 +48,7 @@ func main() {
 
 	startUp()
 	for {
+		fmt.Println()
 		// Ask the user for input
 		input, err := rl.Readline()
 		if err != nil {
@@ -73,44 +73,27 @@ func main() {
 			continue
 		}
 
-		prompts := command.Parse(input)
+		// parse slash command in user input
+		cmd, prompts := command.Parse(input)
 		if prompts == nil {
 			continue
 		}
 
+		// query chatgpt
 		reply, err := ai.Query(prompts)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		reply = strings.TrimSpace(reply)
-		err = copyCode(reply)
-		if err != nil {
-			fmt.Printf("failed to copy to clipboard: %v", err)
+
+		if reply != "" {
+			fmt.Println(color.Green("Aoi:"))
+			fmt.Println(reply)
+			if cmd != nil {
+				cmd.Handle(reply)
+			}
 		}
-
-		fmt.Println(color.Green("Aoi:"))
-		fmt.Println(reply)
 	}
-}
-
-// extractCode extract first markdown code snippet in text
-func extractCode(text string) string {
-	re := regexp.MustCompile("(?sm)^```" + ` ?\w*(.*?)` + "```$")
-	matches := re.FindStringSubmatch(text)
-	if len(matches) > 0 {
-		return strings.TrimSpace(matches[1])
-	}
-	return ""
-}
-
-// copyCode copy the first code snippet in text to clipboard
-func copyCode(text string) error {
-	code := extractCode(text)
-	if code != "" {
-		return clipboard.WriteAll(code)
-	}
-	return nil
 }
 
 func startUp() {

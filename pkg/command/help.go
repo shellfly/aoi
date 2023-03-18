@@ -6,20 +6,29 @@ import (
 )
 
 func init() {
-	commands["help"] = cmdHelp
-	helpMessages["help"] = "/help - show the help message"
+	commands["help"] = &Help{}
 }
 
-func cmdHelp(input string) []string {
-	cmds := make([]string, 0, len(helpMessages))
-	for cmd := range helpMessages {
-		cmds = append(cmds, cmd)
+type Help struct {
+	dummyHandler
+}
+
+func (c *Help) Name() string {
+	return "help"
+}
+func (c *Help) Help() string {
+	return "/help - show the help message"
+}
+
+func (c *Help) Expand(input string) []string {
+	names := make([]string, 0, len(commands))
+	for cmd := range commands {
+		names = append(names, cmd)
 	}
 
-	sort.Strings(cmds)
-	for _, cmd := range cmds {
-		fmt.Println(helpMessages[cmd])
+	sort.Strings(names)
+	for _, name := range names {
+		fmt.Println(commands[name].Help())
 	}
-	fmt.Println()
 	return nil
 }

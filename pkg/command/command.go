@@ -4,31 +4,40 @@ import (
 	"strings"
 )
 
-type commandFunc func(string) []string
+var commands = map[string]Command{}
 
-var (
-	commands     = map[string]commandFunc{}
-	helpMessages = map[string]string{}
-)
+type Command interface {
+	Name() string
+	Help() string
+
+	// expand input to prompts
+	Expand(string) []string
+	// handle reply
+	Handle(string)
+}
+
+type dummyHandler struct{}
+
+func (dummyHandler) Handle(string) {}
 
 // Parse parse slash command in input and generate prompts for ChatGPT
-func Parse(input string) []string {
+func Parse(input string) (cmd Command, prompts []string) {
 	if !strings.HasPrefix(input, "/") {
-		return []string{input}
+		return nil, []string{input}
 	}
 
 	input = input[1:]
 	index := strings.Index(input, " ")
-	var cmd string
+	var cmdName string
 	if index == -1 {
-		cmd, input = input, ""
+		cmdName, input = input, ""
 	} else {
-		cmd, input = input[:index], input[index+1:]
+		cmdName, input = input[:index], input[index+1:]
 	}
 
-	cmdFunc, ok := commands[cmd]
+	cmd, ok := commands[cmdName]
 	if !ok {
-		cmdFunc = cmdHelp
+		cmd = commands["help"]
 	}
-	return cmdFunc(input)
+	return cmd, cmd.Expand(input)
 }
