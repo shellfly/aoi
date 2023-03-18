@@ -53,7 +53,6 @@ func (c *Trans) Run(input string) []string {
 		lang = fullName
 	}
 	return []string{
-		fmt.Sprintf("Translate to %s: ", lang),
-		text,
+		fmt.Sprintf("Translate to %s: %s", lang, text),
 	}
 }
