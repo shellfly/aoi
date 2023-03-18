@@ -6,7 +6,9 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/chzyer/readline"
 
 	"github.com/shellfly/codegpt/pkg/chatgpt"
@@ -94,8 +96,10 @@ func main() {
 			continue
 		}
 
-		// query chatgpt
+		s := spinner.New(spinner.CharSets[11], 300*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
+		s.Start()
 		reply, err := ai.Query(prompts)
+		s.Stop()
 		if err != nil {
 			fmt.Println(err)
 			continue

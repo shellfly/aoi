@@ -103,6 +103,8 @@ func ExecCommand(command string) {
 		}
 		if err != nil {
 			fmt.Println("stop process error: ", err)
+		} else {
+			fmt.Println()
 		}
 	}
 }
