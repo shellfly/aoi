@@ -1,6 +1,7 @@
 package command
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -63,18 +64,36 @@ func ExecCommand(command string) {
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	}
 
-	output := make(chan []byte, 1)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		fmt.Println("Error creating StdoutPipe:", err)
+		return
+	}
+	if err := cmd.Start(); err != nil {
+		fmt.Println("Error starting command:", err)
+		return
+	}
+	// Start a goroutine to read the output
 	go func() {
-		// TODO: real-time output
-		out, _ := cmd.CombinedOutput()
-		output <- out
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+	}()
+
+	done := make(chan struct{})
+	go func() {
+		if err := cmd.Wait(); err != nil {
+			fmt.Println("Error waiting for command:", err)
+			return
+		}
+		close(done)
 	}()
 
 	// Wait for the command to finish or for a signal to be received
 	select {
-	case out := <-output:
-		fmt.Println(string(out))
-		fmt.Println()
+	case <-done:
+		return
 	case <-sigChan:
 		var err error
 		if runtime.GOOS == "windows" {
