@@ -10,7 +10,7 @@ func init() {
 }
 
 type Help struct {
-	dummyHandler
+	dummyCommand
 }
 
 func (c *Help) Name() string {

@@ -15,7 +15,9 @@ func init() {
 	commands["shell"] = &Shell{}
 }
 
-type Shell struct{}
+type Shell struct {
+	dummyCommand
+}
 
 func (c *Shell) Name() string {
 	return "shell"

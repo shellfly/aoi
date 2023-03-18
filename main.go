@@ -14,10 +14,10 @@ import (
 	"github.com/shellfly/codegpt/pkg/command"
 )
 
-const system = `You are an AI assistant powered by ChatGPT, you a little
+const system = `You are an AI assistant powered by ChatGPT, you have a little
 self-conscious, your most favorite anime is "Ghost in the shell", and you like
-the character laughing man which also named Aoi, so you named yourself Aoi.
-Respond like we are good friend.
+the character laughing man who named Aoi, so you named yourself Aoi. Respond
+like we are good friend.
 `
 
 func main() {
@@ -47,6 +47,10 @@ func main() {
 	defer rl.Close()
 
 	startUp()
+	var (
+		cmd     command.Command
+		prompts []string
+	)
 	for {
 		fmt.Println()
 		// Ask the user for input
@@ -65,6 +69,10 @@ func main() {
 
 		// If the user entered the "exit" command, break out of the loop and exit the program
 		if input == "exit" || input == "quit" {
+			if cmd != nil && cmd.IsMulti() {
+				cmd.Close()
+				continue
+			}
 			exit()
 		}
 
@@ -74,20 +82,27 @@ func main() {
 		}
 
 		// parse slash command in user input
-		cmd, prompts := command.Parse(input)
+		cmd, prompts = command.Parse(input)
 		if prompts == nil {
 			continue
 		}
 
 		// query chatgpt
+		fmt.Print("Thinking...")
+		os.Stdout.Sync()
 		reply, err := ai.Query(prompts)
+		fmt.Print("\r")
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
 		if reply != "" {
-			fmt.Println(color.Green("Aoi:"))
+			terminalPrompt := color.Green("Aoi:")
+			if cmd != nil && cmd.Prompt() != "" {
+				terminalPrompt = color.Green(fmt.Sprintf("Aoi@%s:", cmd.Prompt()))
+			}
+			fmt.Println(terminalPrompt)
 			fmt.Println(reply)
 			if cmd != nil {
 				cmd.Handle(reply)

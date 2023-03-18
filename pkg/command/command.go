@@ -9,16 +9,23 @@ var commands = map[string]Command{}
 type Command interface {
 	Name() string
 	Help() string
+	Prompt() string
+	IsMulti() bool
 
 	// expand input to prompts
 	Expand(string) []string
 	// handle reply
 	Handle(string)
+	// clean up
+	Close()
 }
 
-type dummyHandler struct{}
+type dummyCommand struct{}
 
-func (dummyHandler) Handle(string) {}
+func (dummyCommand) IsMulti() bool  { return false }
+func (dummyCommand) Prompt() string { return "" }
+func (dummyCommand) Handle(string)  {}
+func (dummyCommand) Close()         {}
 
 // Parse parse slash command in input and generate prompts for ChatGPT
 func Parse(input string) (cmd Command, prompts []string) {

@@ -23,6 +23,7 @@ func init() {
 }
 
 type Code struct {
+	dummyCommand
 }
 
 func (c *Code) Name() string {
