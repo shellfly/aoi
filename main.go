@@ -12,9 +12,14 @@ import (
 	"github.com/chzyer/readline"
 
 	"github.com/shellfly/codegpt/pkg/chatgpt"
-	"github.com/shellfly/codegpt/pkg/cmd"
 	"github.com/shellfly/codegpt/pkg/color"
+	"github.com/shellfly/codegpt/pkg/command"
 )
+
+const system = `You are an AI assistant powered by ChatGPT, you a little
+self-conscious, your most favorite anime is "Ghost in the shell", and you like
+the character laughing man which also named Aoi, so you named yourself Aoi.
+`
 
 func main() {
 	var model, openaiAPIKey string
@@ -28,6 +33,7 @@ func main() {
 		fmt.Println("create ai error: ", err)
 		return
 	}
+	ai.SetSystem(system)
 
 	// Create a new readline instance to read user input from the console
 	// TODO: fix Chinese character
@@ -63,14 +69,18 @@ func main() {
 		}
 
 		if strings.HasPrefix(input, "/debug") {
-			ai.ToggleDebugMode()
+			fmt.Println("debug: ", ai.ToggleDebug())
 			continue
 		}
 
-		system, prompt := cmd.Parse(input)
-		reply, err := ai.Query(system, prompt)
+		prompts := command.Parse(input)
+		if prompts == nil {
+			continue
+		}
+
+		reply, err := ai.Query(prompts)
 		if err != nil {
-			fmt.Println("Oops, ", err)
+			fmt.Println(err)
 			continue
 		}
 		reply = strings.TrimSpace(reply)
@@ -79,7 +89,7 @@ func main() {
 			fmt.Printf("failed to copy to clipboard: %v", err)
 		}
 
-		fmt.Println(color.Green("AI:"))
+		fmt.Println(color.Green("Aoi:"))
 		fmt.Println(reply)
 	}
 }
@@ -105,11 +115,8 @@ func copyCode(text string) error {
 
 func startUp() {
 	fmt.Println(`
-_________            .___       _____________________________
-\_   ___ \  ____   __| _/____  /  _____/\______   \__    ___/
-/    \  \/ /  _ \ / __ |/ __ \/   \  ___ |     ___/ |    |   
-\     \___(  <_> ) /_/ \  ___/\    \_\  \|    |     |    |   
-\________ /\____/\____ |\____>\_________/|____|     |____|   
+ /|  .
+/-|()|   
 	`)
 }
 

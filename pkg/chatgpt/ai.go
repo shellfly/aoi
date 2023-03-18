@@ -9,9 +9,12 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
+const MessageLimit = 100
+
 type AI struct {
 	client *openai.Client
 
+	system   string
 	model    string
 	messages []openai.ChatCompletionMessage
 
@@ -25,7 +28,7 @@ func NewAI(apiKey, model string) (*AI, error) {
 
 	// Create a new OpenAI API client with the provided API key
 	client := openai.NewClient(apiKey)
-	messages := []openai.ChatCompletionMessage{}
+	messages := make([]openai.ChatCompletionMessage, 2*MessageLimit)
 	ai := &AI{
 		client:   client,
 		model:    model,
@@ -34,20 +37,24 @@ func NewAI(apiKey, model string) (*AI, error) {
 	}
 	return ai, nil
 }
+func (ai *AI) SetSystem(system string) {
+	ai.system = system
+	ai.messages = []openai.ChatCompletionMessage{NewMessage(openai.ChatMessageRoleSystem, system)}
+}
 
-func (ai *AI) Query(system string, prompt string) (string, error) {
+func (ai *AI) Query(prompts []string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
-	if system != "" {
-		ai.messages = []openai.ChatCompletionMessage{NewMessage(openai.ChatMessageRoleSystem, system)}
+	for _, prompt := range prompts {
+		ai.messages = append(ai.messages, NewMessage(openai.ChatMessageRoleUser, prompt))
 	}
-
-	ai.messages = append(ai.messages, NewMessage(openai.ChatMessageRoleUser, prompt))
 	// TODO: accurate way to control tokens limit
 	// https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
-	if len(ai.messages) > 100 {
-		ai.messages = ai.messages[len(ai.messages)-100:]
+	if len(ai.messages) > MessageLimit {
+		// limit to 100 messages and always keep the system message
+		copy(ai.messages[1:], ai.messages[len(ai.messages)-MessageLimit:])
+		ai.messages = ai.messages[:MessageLimit]
 	}
 
 	if ai.debug {
@@ -69,12 +76,9 @@ func (ai *AI) Query(system string, prompt string) (string, error) {
 	return reply, nil
 }
 
-func (ai *AI) ClearMessages() {
-	ai.messages = []openai.ChatCompletionMessage{}
-}
-
-func (ai *AI) ToggleDebugMode() {
+func (ai *AI) ToggleDebug() bool {
 	ai.debug = !ai.debug
+	return ai.debug
 }
 
 func NewMessage(role, text string) openai.ChatCompletionMessage {
