@@ -37,7 +37,7 @@ func main() {
 	// Create a new readline instance to read user input from the console
 	// TODO: fix Chinese character
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:      color.Yellow("You: "),
+
 		HistoryFile: "/tmp/.codegpt-readline.tmp",
 	})
 	if err != nil {
@@ -48,11 +48,16 @@ func main() {
 
 	startUp()
 	var (
-		cmd     command.Command
+		cmd     = command.Dummy()
 		prompts []string
 	)
 	for {
-		fmt.Println()
+		if cmd.IsFinished() {
+			rl.SetPrompt(color.Yellow("You: "))
+		} else {
+			rl.SetPrompt(color.Yellow(cmd.Prompt("You")))
+		}
+
 		// Ask the user for input
 		input, err := rl.Readline()
 		if err != nil {
@@ -62,14 +67,12 @@ func main() {
 			fmt.Println("Error reading input:", err)
 			continue
 		}
-		// If the user entered an empty input, skip to the next iteration of the loop
 		if input == "" {
 			continue
 		}
 
-		// If the user entered the "exit" command, break out of the loop and exit the program
 		if input == "exit" || input == "quit" {
-			if cmd != nil && cmd.IsMulti() {
+			if !cmd.IsFinished() {
 				cmd.Close()
 				continue
 			}
@@ -81,33 +84,27 @@ func main() {
 			continue
 		}
 
-		// parse slash command in user input
-		cmd, prompts = command.Parse(input)
+		if cmd.IsFinished() {
+			// parse slash command in user input
+			cmd, prompts = command.Parse(input)
+		} else {
+			prompts = cmd.Prompts(input)
+		}
 		if prompts == nil {
 			continue
 		}
 
 		// query chatgpt
-		fmt.Print("Thinking...")
-		os.Stdout.Sync()
 		reply, err := ai.Query(prompts)
-		fmt.Print("\r")
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		if reply != "" {
-			terminalPrompt := color.Green("Aoi:")
-			if cmd != nil && cmd.Prompt() != "" {
-				terminalPrompt = color.Green(fmt.Sprintf("Aoi@%s:", cmd.Prompt()))
-			}
-			fmt.Println(terminalPrompt)
-			fmt.Println(reply)
-			if cmd != nil {
-				cmd.Handle(reply)
-			}
-		}
+		fmt.Println(color.Green(cmd.Prompt("Aoi")))
+		fmt.Println(reply)
+		fmt.Println()
+		cmd.Handle(reply)
 	}
 }
 

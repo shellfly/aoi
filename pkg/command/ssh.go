@@ -19,9 +19,11 @@ func init() {
 type Ssh struct {
 	dummyCommand
 
-	client  *ssh.Client
-	host    string
-	isMulti bool
+	client      *ssh.Client
+	host        string
+	osInfo      string
+	isFinished  bool
+	initialized bool
 }
 
 func (c *Ssh) Name() string {
@@ -29,41 +31,56 @@ func (c *Ssh) Name() string {
 }
 
 func (c *Ssh) Help() string {
-	return "ssh - generate shell command and execute it on {host}, e.g. /ssh {host} view listening tcp ports"
+	return "/ssh - generate shell command and execute it on {host}, e.g. /ssh {host} view listening tcp ports"
 }
 
-func (c *Ssh) Prompt() string {
-	return c.host
+func (c *Ssh) Prompt(p string) string {
+	return fmt.Sprintf("(/ssh %s) %s: ", c.host, p)
 }
 
-func (c *Ssh) IsMulti() bool {
-	return c.isMulti
-}
-
-// Expand expand input like "{lang} {question}" to Ssh generation prompts
-func (c *Ssh) Expand(input string) []string {
+// Run...
+func (c *Ssh) Run(input string) []string {
+	c.isFinished = true
 	index := strings.Index(input, " ")
 	if index == -1 {
-		if err := c.SetHost(input); err == nil {
-			c.isMulti = true
+		if err := c.setHost(input); err == nil {
+			c.isFinished = false
 		}
 		return nil
 	}
-	c.isMulti = false
+
 	host, input := input[:index], input[index+1:]
-	if err := c.SetHost(host); err != nil {
+	if err := c.setHost(host); err != nil {
 		return nil
 	}
+	return c.Prompts(input)
+}
+
+func (c *Ssh) IsFinished() bool {
+	return c.isFinished
+}
+
+func (c *Ssh) Prompts(input string) []string {
+	if strings.HasPrefix(input, ":") {
+		fmt.Println(input[1:])
+		c.Handle(input[1:])
+		return nil
+	}
+
+	if c.initialized {
+		return []string{input}
+	}
+	c.initialized = true
 	return []string{
 		fmt.Sprintf(`
 I want you to act as a terminal. I will ask you a question and you will reply with one-line command to do it, avoid pipeline if possible.
 I want you to only reply with the code, and nothing else. do not write explanations.
 My question is how to %s on %s?
-		`, input, c.HostOSinfo()),
+		`, input, c.osInfo),
 	}
 }
 
-func (c *Ssh) SetHost(host string) error {
+func (c *Ssh) setHost(host string) error {
 	hostname := ssh_config.Get(host, "HostName")
 	port := ssh_config.Get(host, "Port")
 	user := ssh_config.Get(host, "User")
@@ -91,10 +108,11 @@ func (c *Ssh) SetHost(host string) error {
 
 	c.client = client
 	c.host = host
+	c.osInfo = c.setOSinfo()
 	return nil
 }
 
-func (c *Ssh) HostOSinfo() string {
+func (c *Ssh) setOSinfo() string {
 	session, err := c.client.NewSession()
 	if err != nil {
 		return ""
@@ -114,11 +132,15 @@ func (c *Ssh) HostOSinfo() string {
 	if err == nil {
 		return fmt.Sprintf("Mac OS %s", output)
 	}
+
+	// TODO: support windows
 	return ""
 }
 
 func (c *Ssh) Close() {
 	c.host = ""
+	c.initialized = false
+	c.isFinished = true
 	c.client.Close()
 }
 
@@ -136,9 +158,7 @@ func (c *Ssh) Handle(reply string) {
 		fmt.Println("Failed to run command: ", err)
 	}
 	fmt.Println(string(out))
-	if !c.isMulti {
-		c.Close()
-	}
+	fmt.Println()
 }
 
 func parseSshKey(files []string) (ssh.Signer, error) {

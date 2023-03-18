@@ -27,11 +27,11 @@ func (c *Shell) Help() string {
 	return "/shell - generate shell command and execute it"
 }
 
-// Expand expand input like "{lang} {question}" to Shell generation prompts
-func (c *Shell) Expand(input string) []string {
+// Run expand input like "{lang} {question}" to Shell generation prompts
+func (c *Shell) Run(input string) []string {
 	if strings.HasPrefix(input, ":") {
-		fmt.Println("run shell: ", input)
-		ExecCommand(input[1:])
+		fmt.Println(input[1:])
+		c.Handle(input[1:])
 		return nil
 	}
 
@@ -46,7 +46,6 @@ My question is how to %s on %s?
 
 // Handle execute shell command
 func (c *Shell) Handle(reply string) {
-	fmt.Println()
 	ExecCommand(reply)
 }
 
@@ -66,6 +65,7 @@ func ExecCommand(command string) {
 
 	output := make(chan []byte, 1)
 	go func() {
+		// TODO: real-time output
 		out, _ := cmd.CombinedOutput()
 		output <- out
 	}()
@@ -74,6 +74,7 @@ func ExecCommand(command string) {
 	select {
 	case out := <-output:
 		fmt.Println(string(out))
+		fmt.Println()
 	case <-sigChan:
 		var err error
 		if runtime.GOOS == "windows" {

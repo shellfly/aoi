@@ -7,30 +7,45 @@ import (
 var commands = map[string]Command{}
 
 type Command interface {
+	/*
+		required for a new command
+	*/
 	Name() string
 	Help() string
-	Prompt() string
-	IsMulti() bool
+	Run(string) []string // Run command and return optional ChatGPT prompts
 
-	// expand input to prompts
-	Expand(string) []string
-	// handle reply
-	Handle(string)
-	// clean up
-	Close()
+	/*
+		optional for new command, could inherit from dummyCommand
+	*/
+	Handle(string) // handle reply
+
+	IsFinished() bool        // multiple commands mode
+	Prompts(string) []string // multiple commands mode, continue generate prompts
+	Close()                  // multiple commands mode, clean up
+
+	Prompt(string) string // set custom terminal prompt
 }
 
 type dummyCommand struct{}
 
-func (dummyCommand) IsMulti() bool  { return false }
-func (dummyCommand) Prompt() string { return "" }
-func (dummyCommand) Handle(string)  {}
-func (dummyCommand) Close()         {}
+func (*dummyCommand) Name() string                  { return "dummy" }
+func (*dummyCommand) Help() string                  { return "" }
+func (*dummyCommand) Run(input string) []string     { return []string{input} }
+func (*dummyCommand) Handle(string)                 {}
+func (*dummyCommand) IsFinished() bool              { return true }
+func (*dummyCommand) Prompts(input string) []string { return []string{input} }
+func (*dummyCommand) Close()                        {}
+func (*dummyCommand) Prompt(p string) string        { return p + ": " }
+
+// Dummy return the dummy command
+func Dummy() Command {
+	return &dummyCommand{}
+}
 
 // Parse parse slash command in input and generate prompts for ChatGPT
 func Parse(input string) (cmd Command, prompts []string) {
 	if !strings.HasPrefix(input, "/") {
-		return nil, []string{input}
+		return Dummy(), []string{input}
 	}
 
 	input = input[1:]
@@ -46,5 +61,5 @@ func Parse(input string) (cmd Command, prompts []string) {
 	if !ok {
 		cmd = commands["help"]
 	}
-	return cmd, cmd.Expand(input)
+	return cmd, cmd.Run(input)
 }
