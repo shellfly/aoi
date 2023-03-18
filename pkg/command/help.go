@@ -7,7 +7,7 @@ import (
 
 func init() {
 	commands["help"] = cmdHelp
-	helpMessages["help"] = "/help -- show the help message"
+	helpMessages["help"] = "/help - show the help message"
 }
 
 func cmdHelp(input string) []string {
@@ -20,5 +20,6 @@ func cmdHelp(input string) []string {
 	for _, cmd := range cmds {
 		fmt.Println(helpMessages[cmd])
 	}
+	fmt.Println()
 	return nil
 }

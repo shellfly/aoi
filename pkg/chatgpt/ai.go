@@ -42,6 +42,19 @@ func (ai *AI) SetSystem(system string) {
 	ai.messages = []openai.ChatCompletionMessage{NewMessage(openai.ChatMessageRoleSystem, system)}
 }
 
+// limitTokens make sure messages are under tokens limit
+// TODO: accurate way to control tokens limit
+// https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
+func (ai *AI) limitTokens() {
+	if len(ai.messages) < MessageLimit {
+		return
+	}
+
+	// keep last MessageLimit messages and the system message
+	copy(ai.messages[1:], ai.messages[len(ai.messages)-MessageLimit:])
+	ai.messages = ai.messages[:MessageLimit]
+}
+
 func (ai *AI) Query(prompts []string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
@@ -49,13 +62,7 @@ func (ai *AI) Query(prompts []string) (string, error) {
 	for _, prompt := range prompts {
 		ai.messages = append(ai.messages, NewMessage(openai.ChatMessageRoleUser, prompt))
 	}
-	// TODO: accurate way to control tokens limit
-	// https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
-	if len(ai.messages) > MessageLimit {
-		// limit to 100 messages and always keep the system message
-		copy(ai.messages[1:], ai.messages[len(ai.messages)-MessageLimit:])
-		ai.messages = ai.messages[:MessageLimit]
-	}
+	ai.limitTokens()
 
 	if ai.debug {
 		fmt.Println(ai.messages)

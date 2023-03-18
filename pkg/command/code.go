@@ -16,16 +16,17 @@ var abbreviations = map[string]string{
 }
 
 func init() {
-	commands["code"] = expandCode
-	helpMessages["code"] = "/code {lang} {question} -- generate code snippet and write it to clipboard , e.g. /code go generate random number"
+	commands["code"] = cmdCode
+	helpMessages["code"] = "/code {lang} {question} - generate code snippet and write it to clipboard , e.g. /code go generate random number"
 }
 
-// expandCode...
+// cmdCode...
 // input: {lang} {question}
-func expandCode(input string) []string {
+func cmdCode(input string) []string {
 	index := strings.Index(input, " ")
 	if index == -1 {
 		fmt.Println(helpMessages["code"])
+		fmt.Println()
 		return nil
 	}
 
