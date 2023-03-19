@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,22 +14,21 @@ func init() {
 	commands["db"] = &DB{}
 }
 
-// TODO: Leverage other tools to keep things simple
-// use Go code to access various database
-var clients = map[string]string{
-	"mysql":    "mysql",
-	"postgres": "psql",
-	"sqlite":   "sqlite3",
-}
-
 type DB struct {
 	dummyCommand
 
 	dbType      string
-	url         string
 	client      string
+	args        []string
 	isFinished  bool
 	initialized bool
+}
+
+var dbTypes = map[string]string{
+	"mysql":   "mysql",
+	"psql":    "postgres",
+	"sqlite3": "sqlite",
+	"sqlite":  "sqlite",
 }
 
 func (c *DB) Name() string {
@@ -51,23 +49,20 @@ func (c *DB) Prompt(p string) string {
 
 // Init...
 func (c *DB) Init(input string) string {
-	c.isFinished = true
-	index := strings.Index(input, " ")
-	if index == -1 {
-		if err := c.setUrl(input); err != nil {
-			fmt.Println(err)
-			return ""
-		}
-		c.isFinished = false
-		return ""
+	parts := strings.Split(input, " ")
+	c.client, c.args = parts[0], parts[1:]
+	if dbType, ok := dbTypes[c.client]; ok {
+		c.dbType = dbType
+	} else {
+		c.dbType = c.client
 	}
 
-	url, input := input[:index], input[index+1:]
-	if err := c.setUrl(url); err != nil {
-		fmt.Println(err)
+	if output, err := c.ExecSQL("SELECT 42"); err != nil {
+		fmt.Println("connect to db error: ", output)
 		return ""
 	}
-	return input
+	c.isFinished = false
+	return ""
 }
 
 func (c *DB) IsFinished() bool {
@@ -96,7 +91,8 @@ func (c *DB) Prompts(input string) []string {
 
 func (c *DB) Finish() {
 	c.dbType = ""
-	c.url = ""
+	c.client = ""
+	c.args = nil
 	c.isFinished = true
 }
 
@@ -105,28 +101,16 @@ func (c *DB) Handle(reply string) {
 	sql := reply
 	if strings.Contains(reply, "```") {
 		sql = extractCode(reply)
+		fmt.Println("reply: ", reply)
+		fmt.Println("exact code: ", sql)
 	}
 	output, err := c.ExecSQL(sql)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(output, err)
 	} else {
 		fmt.Println(output)
 	}
 	fmt.Println()
-}
-
-func (c *DB) setUrl(url string) error {
-	parts := strings.Split(url, "://")
-	dbType, url := parts[0], parts[1]
-	client, ok := clients[dbType]
-	if !ok {
-		return errors.New("unsupported database")
-	}
-	c.client = client
-	c.dbType = dbType
-	c.url = url
-	_, err := c.ExecSQL("SELECT 42")
-	return err
 }
 
 func (c *DB) FetchTables() string {
@@ -142,14 +126,19 @@ func (c *DB) FetchTables() string {
 	return output
 }
 
-func (c *DB) command(sql string) []string {
+func (c *DB) execArgs(sql string) []string {
+	args := make([]string, len(c.args))
+	copy(args, c.args)
 	switch c.dbType {
 	case "mysql":
-		return []string{c.url, "-e", sql}
+		args = append(args, []string{"-e", sql}...)
 	case "postgres":
-		return []string{c.url, "-c", sql}
+		args = append(args, []string{"-c", sql}...)
+	case "sqlite":
+		args = append(args, sql)
 	}
-	return []string{c.url, sql}
+
+	return args
 }
 
 func (c *DB) ExecSQL(sql string) (string, error) {
@@ -157,8 +146,9 @@ func (c *DB) ExecSQL(sql string) (string, error) {
 	signal.Notify(sigChan, os.Interrupt)
 	defer signal.Reset(os.Interrupt)
 
-	cmd := exec.Command(c.client, c.command(sql)...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	fmt.Println("exec sql: ", c.client, c.execArgs(sql))
+	cmd := exec.Command(c.client, c.execArgs(sql)...)
+	cmd.Stdin = os.Stdin
 
 	done := make(chan struct{})
 	var output []byte
@@ -175,7 +165,7 @@ func (c *DB) ExecSQL(sql string) (string, error) {
 		if runtime.GOOS == "windows" {
 			err = cmd.Process.Signal(os.Kill)
 		} else {
-			err = syscall.Kill(-cmd.Process.Pid, syscall.SIGINT)
+			err = syscall.Kill(cmd.Process.Pid, syscall.SIGINT)
 		}
 	}
 	return string(output), err

@@ -1,7 +1,6 @@
 package command
 
 import (
-	"bufio"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -61,32 +60,17 @@ func ExecShell(command string) {
 		cmd = exec.Command("cmd", "/C", command)
 	} else {
 		cmd = exec.Command("bash", "-c", command)
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	}
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		fmt.Println("Error creating StdoutPipe:", err)
-		return
-	}
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
 		fmt.Println("Error starting command:", err)
 		return
 	}
-	// Start a goroutine to read the output
-	go func() {
-		scanner := bufio.NewScanner(stdout)
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-		}
-	}()
-
 	done := make(chan struct{})
 	go func() {
-		if err := cmd.Wait(); err != nil {
-			fmt.Println("Error waiting for command:", err)
-			return
-		}
+		_ = cmd.Wait()
 		close(done)
 	}()
 
@@ -95,17 +79,12 @@ func ExecShell(command string) {
 	case <-done:
 		return
 	case <-sigChan:
-		var err error
 		if runtime.GOOS == "windows" {
-			err = cmd.Process.Signal(os.Kill)
+			_ = cmd.Process.Signal(os.Kill)
 		} else {
-			err = syscall.Kill(-cmd.Process.Pid, syscall.SIGINT)
+			_ = syscall.Kill(cmd.Process.Pid, syscall.SIGINT)
 		}
-		if err != nil {
-			fmt.Println("stop process error: ", err)
-		} else {
-			fmt.Println()
-		}
+		fmt.Println()
 	}
 }
 

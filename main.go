@@ -65,7 +65,7 @@ func main() {
 		if input == "" {
 			continue
 		}
-
+		rl.SaveHistory(input)
 		fmt.Println(color.Green(cmd.Prompt("Aoi")))
 
 		if strings.HasPrefix(input, "/debug") {
