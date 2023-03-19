@@ -103,8 +103,6 @@ func main() {
 		}
 
 		lastReply = reply
-		fmt.Println(reply)
-		fmt.Println()
 		cmd.Handle(reply)
 	}
 }

@@ -30,7 +30,6 @@ func (c *Shell) Help() string {
 // Prompts expand input like "{lang} {question}" to Shell generation prompts
 func (c *Shell) Prompts(input string) []string {
 	if strings.HasPrefix(input, ":") {
-		fmt.Println(input[1:])
 		c.Handle(input[1:])
 		return nil
 	}
@@ -46,6 +45,8 @@ My question is how to %s on %s?
 
 // Handle execute shell command
 func (c *Shell) Handle(reply string) {
+	fmt.Println(reply)
+	fmt.Println()
 	ExecShell(reply)
 }
 

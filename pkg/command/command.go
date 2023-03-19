@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -26,10 +27,13 @@ func (*dummyCommand) Name() string                  { return "" }
 func (*dummyCommand) Help() string                  { return "" }
 func (*dummyCommand) Init(input string) string      { return input }
 func (*dummyCommand) Prompts(input string) []string { return []string{input} }
-func (*dummyCommand) Handle(string)                 {}
-func (*dummyCommand) IsFinished() bool              { return true }
-func (*dummyCommand) Finish()                       {}
-func (*dummyCommand) Prompt(p string) string        { return p + ": " }
+func (*dummyCommand) Handle(reply string) {
+	fmt.Println(reply)
+	fmt.Println()
+}
+func (*dummyCommand) IsFinished() bool       { return true }
+func (*dummyCommand) Finish()                {}
+func (*dummyCommand) Prompt(p string) string { return p + ": " }
 
 // Dummy return the dummy command
 func Dummy() Command {

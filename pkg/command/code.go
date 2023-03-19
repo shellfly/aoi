@@ -55,6 +55,8 @@ func (c *Code) Prompts(input string) []string {
 // Handle copy code in the reply to clipboard, and return the original reply
 func (c *Code) Handle(reply string) {
 	code := extractCode(reply)
+	fmt.Println(code)
+	fmt.Println()
 	if code != "" {
 		if err := clipboard.WriteAll(code); err != nil {
 			fmt.Printf("failed to copy to clipboard: %v", err)
@@ -64,8 +66,8 @@ func (c *Code) Handle(reply string) {
 
 // extractCode extract first markdown code snippet in text
 func extractCode(text string) string {
-	re := regexp.MustCompile("(?sm)```.*\n(.*)\n```.*")
-	//re := regexp.MustCompile("(?sm)^```" + `\w*(.*?)` + "```$")
+	//sre := regexp.MustCompile("(?sm)```.*\n(.*)\n```.*")
+	re := regexp.MustCompile("(?sm)^```" + `\w*(.*?)` + "```$")
 	matches := re.FindStringSubmatch(text)
 	if len(matches) > 0 {
 		return strings.TrimSpace(matches[1])

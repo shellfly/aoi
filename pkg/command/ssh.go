@@ -67,7 +67,6 @@ func (c *Ssh) IsFinished() bool {
 
 func (c *Ssh) Prompts(input string) []string {
 	if strings.HasPrefix(input, ":") {
-		fmt.Println(input[1:])
 		c.Handle(input[1:])
 		return nil
 	}
@@ -94,6 +93,8 @@ func (c *Ssh) Finish() {
 
 // Handle execute command on c.host
 func (c *Ssh) Handle(reply string) {
+	fmt.Println(reply)
+	fmt.Println()
 	session, err := c.client.NewSession()
 	if err != nil {
 		fmt.Println("failed to create session on host: ", err)

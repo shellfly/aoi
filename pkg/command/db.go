@@ -1,13 +1,12 @@
 package command
 
 import (
+	"context"
 	"fmt"
-	"os"
-	"os/exec"
-	"os/signal"
-	"runtime"
 	"strings"
-	"syscall"
+	"time"
+
+	"github.com/rest-go/rest/pkg/sql"
 )
 
 func init() {
@@ -18,17 +17,9 @@ type DB struct {
 	dummyCommand
 
 	dbType      string
-	client      string
-	args        []string
+	db          *sql.DB
 	isFinished  bool
 	initialized bool
-}
-
-var dbTypes = map[string]string{
-	"mysql":   "mysql",
-	"psql":    "postgres",
-	"sqlite3": "sqlite",
-	"sqlite":  "sqlite",
 }
 
 func (c *DB) Name() string {
@@ -49,20 +40,26 @@ func (c *DB) Prompt(p string) string {
 
 // Init...
 func (c *DB) Init(input string) string {
-	parts := strings.Split(input, " ")
-	c.client, c.args = parts[0], parts[1:]
-	if dbType, ok := dbTypes[c.client]; ok {
-		c.dbType = dbType
-	} else {
-		c.dbType = c.client
-	}
-
-	if output, err := c.ExecSQL("SELECT 42"); err != nil {
-		fmt.Println("connect to db error: ", output)
+	c.isFinished = true
+	index := strings.Index(input, " ")
+	if index == -1 {
+		if err := c.setDB(input); err == nil {
+			fmt.Println("connected to db, you can now ask for SQL tasks")
+			c.isFinished = false
+		} else {
+			fmt.Println(err)
+			fmt.Println()
+		}
 		return ""
 	}
-	c.isFinished = false
-	return ""
+
+	host, input := input[:index], input[index+1:]
+	if err := c.setDB(host); err != nil {
+		fmt.Println(err)
+		fmt.Println()
+		return ""
+	}
+	return input
 }
 
 func (c *DB) IsFinished() bool {
@@ -71,7 +68,6 @@ func (c *DB) IsFinished() bool {
 
 func (c *DB) Prompts(input string) []string {
 	if strings.HasPrefix(input, ":") {
-		fmt.Println(input[1:])
 		c.Handle(input[1:])
 		return nil
 	}
@@ -81,18 +77,20 @@ func (c *DB) Prompts(input string) []string {
 	}
 	c.initialized = true
 
-	prompts := []string{
-		fmt.Sprintf("Given these table definitions: \n %s\n", c.FetchTables()),
-		fmt.Sprintf("You are a %s expert, reply with the code, and nothing else. do not write explanations.", c.dbType),
-		input,
+	prompts := []string{"Given these table definitions: \n"}
+	tables := c.db.FetchTables()
+	definitions := make([]string, 0, len(tables))
+	for _, table := range tables {
+		definitions = append(definitions, table.String())
 	}
+	prompts = append(prompts, fmt.Sprintf("%s\n", strings.Join(definitions, "\n\n")))
+	prompts = append(prompts, fmt.Sprintf("You are a %s expert, give SQL for %s , reply with the code, and nothing else.", c.dbType, input))
 	return prompts
 }
 
 func (c *DB) Finish() {
 	c.dbType = ""
-	c.client = ""
-	c.args = nil
+	c.db = nil
 	c.isFinished = true
 }
 
@@ -101,9 +99,9 @@ func (c *DB) Handle(reply string) {
 	sql := reply
 	if strings.Contains(reply, "```") {
 		sql = extractCode(reply)
-		fmt.Println("reply: ", reply)
-		fmt.Println("exact code: ", sql)
 	}
+	fmt.Println(sql)
+	fmt.Println()
 	output, err := c.ExecSQL(sql)
 	if err != nil {
 		fmt.Println(output, err)
@@ -113,60 +111,22 @@ func (c *DB) Handle(reply string) {
 	fmt.Println()
 }
 
-func (c *DB) FetchTables() string {
-	var output string
-	switch c.dbType {
-	case "mysql":
-		output, _ = c.ExecSQL("sh")
-	case "postgres":
-		output, _ = c.ExecSQL("sh")
-	case "sqlite":
-		output, _ = c.ExecSQL(".schema")
+func (c *DB) setDB(url string) error {
+	db, err := sql.Open(url)
+	if err != nil {
+		return err
 	}
-	return output
-}
-
-func (c *DB) execArgs(sql string) []string {
-	args := make([]string, len(c.args))
-	copy(args, c.args)
-	switch c.dbType {
-	case "mysql":
-		args = append(args, []string{"-e", sql}...)
-	case "postgres":
-		args = append(args, []string{"-c", sql}...)
-	case "sqlite":
-		args = append(args, sql)
-	}
-
-	return args
+	c.db = db
+	c.dbType = db.DriverName
+	return nil
 }
 
 func (c *DB) ExecSQL(sql string) (string, error) {
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt)
-	defer signal.Reset(os.Interrupt)
-
-	fmt.Println("exec sql: ", c.client, c.execArgs(sql))
-	cmd := exec.Command(c.client, c.execArgs(sql)...)
-	cmd.Stdin = os.Stdin
-
-	done := make(chan struct{})
-	var output []byte
-	var err error
-	go func() {
-		output, err = cmd.CombinedOutput()
-		close(done)
-	}()
-
-	// Wait for the command to finish or for a signal to be received
-	select {
-	case <-done:
-	case <-sigChan:
-		if runtime.GOOS == "windows" {
-			err = cmd.Process.Signal(os.Kill)
-		} else {
-			err = syscall.Kill(cmd.Process.Pid, syscall.SIGINT)
-		}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	data, err := c.db.FetchData(ctx, sql)
+	if err != nil {
+		return "", err
 	}
-	return string(output), err
+	return fmt.Sprintf("%v", data), nil
 }
