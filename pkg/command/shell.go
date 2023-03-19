@@ -45,8 +45,6 @@ My question is how to %s on %s?
 
 // Handle execute shell command
 func (c *Shell) Handle(reply string) {
-	fmt.Println(reply)
-	fmt.Println()
 	ExecShell(reply)
 }
 
@@ -56,6 +54,8 @@ func ExecShell(command string) {
 	defer signal.Reset(os.Interrupt)
 
 	command = strings.ReplaceAll(command, "`", "")
+	fmt.Println(command)
+	fmt.Println()
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		cmd = exec.Command("cmd", "/C", command)
