@@ -29,6 +29,6 @@ aoi
 ```
 
 ## 演示
-
+[![asciicast](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN.svg)](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN)
 ## 贡献
 如果在使用 Aoi 时发现任何问题或有新功能的建议，请在 GitHub 存储库上创建问题或提交拉取请求。
