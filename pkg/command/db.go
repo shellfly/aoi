@@ -3,7 +3,9 @@ package command
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/rest-go/rest/pkg/sql"
@@ -92,6 +94,7 @@ func (c *DB) Finish() {
 	c.dbType = ""
 	c.db = nil
 	c.isFinished = true
+	c.initialized = false
 }
 
 // Handle execute SQL
@@ -102,13 +105,11 @@ func (c *DB) Handle(reply string) {
 	}
 	fmt.Println(sql)
 	fmt.Println()
-	output, err := c.ExecSQL(sql)
+	err := c.ExecSQL(sql)
 	if err != nil {
-		fmt.Println(output, err)
-	} else {
-		fmt.Println(output)
+		fmt.Println(err)
+		fmt.Println()
 	}
-	fmt.Println()
 }
 
 func (c *DB) setDB(url string) error {
@@ -121,12 +122,32 @@ func (c *DB) setDB(url string) error {
 	return nil
 }
 
-func (c *DB) ExecSQL(sql string) (string, error) {
+func (c *DB) ExecSQL(sql string) error {
+	// TODO: fix panic in rest-go/rest/pkg/sql
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("panic when query database:", r)
+			fmt.Println()
+		}
+	}()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	data, err := c.db.FetchData(ctx, sql)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return fmt.Sprintf("%v", data), nil
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	for k := range data[0] {
+		fmt.Fprintf(w, "%s\t", k)
+	}
+	fmt.Fprintln(w, "")
+	for _, r := range data {
+		for _, v := range r {
+			fmt.Fprintf(w, "%v\t", v)
+		}
+		fmt.Fprintln(w, "")
+	}
+	w.Flush()
+	return nil
 }
