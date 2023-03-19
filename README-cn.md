@@ -18,7 +18,7 @@ Aoi 是由 ChatGPT 驱动的基于人工智能的对话代理程序。使用 Aoi
 可以从 GitHub 的[发布页面](https://github.com/shellfly/aoi/releases)下载 Aoi。或者，可以使用 Go 在系统上安装 Aoi：
 
 ```bash
-go install github.com/shellfly/aoi
+go install github.com/shellfly/aoi@latest
 ```
 将 OpenAI API 密钥设置为环境变量，然后运行 aoi 命令。
 

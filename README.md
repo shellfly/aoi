@@ -22,7 +22,7 @@ You can use Aoi as a terminal version of ChatGPT, Besides, Aoi comes with severa
 You can download Aoi from the GitHub [release page](https://github.com/shellfly/aoi/releases). Alternatively, you can use Go to install Aoi on your system:
 
 ```bash
-go install github.com/shellfly/aoi
+go install github.com/shellfly/aoi@latest
 ```
 
 Set your OpenAI API key as an environment variable, and then run the `aoi` command.
