@@ -34,8 +34,8 @@ func (c *Code) Help() string {
 	return "/code {lang} {question} - generate code snippet and write it to clipboard , e.g. /code go generate random number"
 }
 
-// Run expand input like "{lang} {question}" to code generation prompts
-func (c *Code) Run(input string) []string {
+// Prompts expand input like "{lang} {question}" to code generation prompts
+func (c *Code) Prompts(input string) []string {
 	index := strings.Index(input, " ")
 	if index == -1 {
 		fmt.Println(c.Help())
@@ -47,7 +47,7 @@ func (c *Code) Run(input string) []string {
 		lang = fullName
 	}
 	return []string{
-		fmt.Sprintf("Act as a senior %s engineer, respond code only, don't add comment, don't do explanation", lang),
+		fmt.Sprintf("You are a programming expert on %s, respond code only, don't add comment, don't do explanation", lang),
 		question,
 	}
 }

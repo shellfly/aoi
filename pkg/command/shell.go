@@ -28,8 +28,8 @@ func (c *Shell) Help() string {
 	return "/shell - generate shell command and execute it"
 }
 
-// Run expand input like "{lang} {question}" to Shell generation prompts
-func (c *Shell) Run(input string) []string {
+// Prompts expand input like "{lang} {question}" to Shell generation prompts
+func (c *Shell) Prompts(input string) []string {
 	if strings.HasPrefix(input, ":") {
 		fmt.Println(input[1:])
 		c.Handle(input[1:])

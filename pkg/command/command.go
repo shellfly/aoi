@@ -7,34 +7,28 @@ import (
 var commands = map[string]Command{}
 
 type Command interface {
-	/*
-		required for a new command
-	*/
 	Name() string
 	Help() string
-	Run(string) []string // Run command and return optional ChatGPT prompts
+	Init(string) string      // initialize command by input
+	Prompts(string) []string // return optional ChatGPT prompts
 
-	/*
-		optional for new command, could inherit from dummyCommand
-	*/
 	Handle(string) // handle reply
 
-	IsFinished() bool        // multiple commands mode
-	Prompts(string) []string // multiple commands mode, continue generate prompts
-	Close()                  // multiple commands mode, clean up
+	IsFinished() bool // multiple commands mode
+	Finish()          // multiple commands mode, clean up
 
 	Prompt(string) string // set custom terminal prompt
 }
 
 type dummyCommand struct{}
 
-func (*dummyCommand) Name() string                  { return "dummy" }
+func (*dummyCommand) Name() string                  { return "" }
 func (*dummyCommand) Help() string                  { return "" }
-func (*dummyCommand) Run(input string) []string     { return []string{input} }
+func (*dummyCommand) Init(input string) string      { return input }
+func (*dummyCommand) Prompts(input string) []string { return []string{input} }
 func (*dummyCommand) Handle(string)                 {}
 func (*dummyCommand) IsFinished() bool              { return true }
-func (*dummyCommand) Prompts(input string) []string { return []string{input} }
-func (*dummyCommand) Close()                        {}
+func (*dummyCommand) Finish()                       {}
 func (*dummyCommand) Prompt(p string) string        { return p + ": " }
 
 // Dummy return the dummy command
@@ -61,5 +55,9 @@ func Parse(input string) (cmd Command, prompts []string) {
 	if !ok {
 		cmd = commands["help"]
 	}
-	return cmd, cmd.Run(input)
+	input = cmd.Init(input)
+	if input != "" {
+		prompts = cmd.Prompts(input)
+	}
+	return cmd, prompts
 }

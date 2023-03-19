@@ -41,7 +41,7 @@ func (c *Trans) Help() string {
 }
 
 // Run expand input like "{lang} {question}" to code generation prompts
-func (c *Trans) Run(input string) []string {
+func (c *Trans) Prompts(input string) []string {
 	index := strings.Index(input, " ")
 	if index == -1 {
 		fmt.Println(c.Help())

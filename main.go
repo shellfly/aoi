@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -36,11 +37,10 @@ func main() {
 	}
 	ai.SetSystem(system)
 
-	// Create a new readline instance to read user input from the console
 	// TODO: fix Chinese character
+	configDir := makeDir(".aoi")
 	rl, err := readline.NewEx(&readline.Config{
-
-		HistoryFile: "/tmp/.codegpt-readline.tmp",
+		HistoryFile: filepath.Join(configDir, "history"),
 	})
 	if err != nil {
 		fmt.Println("create readline error: ", err)
@@ -60,25 +60,9 @@ func main() {
 			rl.SetPrompt(color.Yellow(cmd.Prompt("You")))
 		}
 
-		// Ask the user for input
-		input, err := rl.Readline()
-		if err != nil {
-			if err == io.EOF || err == readline.ErrInterrupt {
-				exit()
-			}
-			fmt.Println("Error reading input:", err)
-			continue
-		}
+		input := getInput(rl, cmd)
 		if input == "" {
 			continue
-		}
-
-		if input == "exit" || input == "quit" {
-			if !cmd.IsFinished() {
-				cmd.Close()
-				continue
-			}
-			exit()
 		}
 
 		if strings.HasPrefix(input, "/debug") {
@@ -86,8 +70,9 @@ func main() {
 			continue
 		}
 
+		// If previous is finished try to create a new one, otherwise continue
+		// to reuse it for prompts
 		if cmd.IsFinished() {
-			// parse slash command in user input
 			cmd, prompts = command.Parse(input)
 		} else {
 			prompts = cmd.Prompts(input)
@@ -96,6 +81,7 @@ func main() {
 			continue
 		}
 
+		// Query AI for response
 		s := spinner.New(spinner.CharSets[11], 300*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
 		s.Start()
 		reply, err := ai.Query(prompts)
@@ -105,6 +91,7 @@ func main() {
 			continue
 		}
 
+		// Show reply and pass reply for cmd to handle
 		fmt.Println(color.Green(cmd.Prompt("Aoi")))
 		fmt.Println(reply)
 		fmt.Println()
@@ -122,4 +109,41 @@ func startUp() {
 func exit() {
 	fmt.Println("Bye")
 	os.Exit(0)
+}
+
+func getInput(rl *readline.Instance, cmd command.Command) string {
+	input, err := rl.Readline()
+	if err != nil {
+		if err == io.EOF || err == readline.ErrInterrupt {
+			if !cmd.IsFinished() {
+				cmd.Finish()
+			} else {
+				exit()
+			}
+		}
+		fmt.Println("Error reading input:", err)
+	}
+	if input == "exit" || input == "quit" {
+		if !cmd.IsFinished() {
+			cmd.Finish()
+		} else {
+			exit()
+		}
+	}
+	return input
+}
+
+func makeDir(dirName string) string {
+	parent, err := os.UserHomeDir()
+	if err != nil {
+		parent = "."
+	}
+	dirName = filepath.Join(parent, dirName)
+	if _, err := os.Stat(dirName); os.IsNotExist(err) {
+		err := os.Mkdir(dirName, 0755)
+		if err != nil {
+			fmt.Println("Error creating directory:", err)
+		}
+	}
+	return dirName
 }

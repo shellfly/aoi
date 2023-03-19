@@ -20,8 +20,8 @@ func (c *TLDR) Help() string {
 	return "/tldr {command} - explain command in tl;dr format"
 }
 
-// Run ...
-func (c *TLDR) Run(input string) []string {
+// Prompts generate tldr prompt
+func (c *TLDR) Prompts(input string) []string {
 	return []string{
 		fmt.Sprintf(`
 I want you to act as man pages. I will ask you a command and you will show simpler doc and practical examples, don't do explanation.

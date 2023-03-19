@@ -20,7 +20,7 @@ func (c *Help) Help() string {
 	return "/help - show the help message"
 }
 
-func (c *Help) Run(input string) []string {
+func (c *Help) Init(input string) string {
 	names := make([]string, 0, len(commands))
 	for cmd := range commands {
 		names = append(names, cmd)
@@ -31,5 +31,5 @@ func (c *Help) Run(input string) []string {
 		fmt.Println(commands[name].Help())
 	}
 	fmt.Println()
-	return nil
+	return ""
 }

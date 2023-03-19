@@ -34,26 +34,27 @@ func (c *Ssh) Help() string {
 	return "/ssh - generate shell command and execute it on {host}, e.g. /ssh {host} view listening tcp ports"
 }
 
+// Prompt set terminal prompt for ssh command
 func (c *Ssh) Prompt(p string) string {
 	return fmt.Sprintf("(/ssh %s) %s: ", c.host, p)
 }
 
-// Run...
-func (c *Ssh) Run(input string) []string {
+// Init...
+func (c *Ssh) Init(input string) string {
 	c.isFinished = true
 	index := strings.Index(input, " ")
 	if index == -1 {
 		if err := c.setHost(input); err == nil {
 			c.isFinished = false
 		}
-		return nil
+		return ""
 	}
 
 	host, input := input[:index], input[index+1:]
 	if err := c.setHost(host); err != nil {
-		return nil
+		return ""
 	}
-	return c.Prompts(input)
+	return input
 }
 
 func (c *Ssh) IsFinished() bool {
@@ -78,6 +79,30 @@ I want you to only reply with the code, and nothing else. do not write explanati
 My question is how to %s on %s?
 		`, input, c.osInfo),
 	}
+}
+
+func (c *Ssh) Close() {
+	c.host = ""
+	c.initialized = false
+	c.isFinished = true
+	c.client.Close()
+}
+
+// Handle execute command on c.host
+func (c *Ssh) Handle(reply string) {
+	session, err := c.client.NewSession()
+	if err != nil {
+		fmt.Println("failed to create session on host: ", err)
+		return
+	}
+	defer session.Close()
+
+	out, err := session.CombinedOutput(reply)
+	if err != nil {
+		fmt.Println("Failed to run command: ", err)
+	}
+	fmt.Println(string(out))
+	fmt.Println()
 }
 
 func (c *Ssh) setHost(host string) error {
@@ -135,30 +160,6 @@ func (c *Ssh) setOSinfo() string {
 
 	// TODO: support windows
 	return ""
-}
-
-func (c *Ssh) Close() {
-	c.host = ""
-	c.initialized = false
-	c.isFinished = true
-	c.client.Close()
-}
-
-// Handle execute command on c.host
-func (c *Ssh) Handle(reply string) {
-	session, err := c.client.NewSession()
-	if err != nil {
-		fmt.Println("failed to create session on host: ", err)
-		return
-	}
-	defer session.Close()
-
-	out, err := session.CombinedOutput(reply)
-	if err != nil {
-		fmt.Println("Failed to run command: ", err)
-	}
-	fmt.Println(string(out))
-	fmt.Println()
 }
 
 func parseSshKey(files []string) (ssh.Signer, error) {
