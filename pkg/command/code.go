@@ -31,7 +31,7 @@ func (c *Code) Name() string {
 }
 
 func (c *Code) Help() string {
-	return "/code {lang} {question} - generate code snippet and write it to clipboard , e.g. /code go generate random number"
+	return "/code {lang} {question} - Generate code snippets and copy to the clipboard , e.g. /code go generate random number"
 }
 
 // Prompts expand input like "{lang} {question}" to code generation prompts

@@ -29,7 +29,7 @@ func (c *DB) Name() string {
 }
 
 func (c *DB) Help() string {
-	return "/db - generate SQL and execute it on database, e.g. /db {url} show tables"
+	return "/db - Generate SQL and execute it on the database, e.g. /db {url} show tables"
 }
 
 // Prompt set terminal prompt for ssh command

@@ -31,7 +31,7 @@ func (c *Ssh) Name() string {
 }
 
 func (c *Ssh) Help() string {
-	return "/ssh - generate shell command and execute it on {host}, e.g. /ssh {host} view listening tcp ports"
+	return "/ssh - Generate shell command and execute it on the remote host, e.g. /ssh {host} view listening tcp ports"
 }
 
 // Prompt set terminal prompt for ssh command

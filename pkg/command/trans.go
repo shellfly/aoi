@@ -37,7 +37,7 @@ func (c *Trans) Name() string {
 }
 
 func (c *Trans) Help() string {
-	return "/trans {lang code} {text} - translate {text } to {lang code}"
+	return "/trans {lang code} {text} - Translate text to a specified language"
 }
 
 // Run expand input like "{lang} {question}" to code generation prompts

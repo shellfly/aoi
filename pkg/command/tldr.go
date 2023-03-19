@@ -17,7 +17,7 @@ func (c *TLDR) Name() string {
 }
 
 func (c *TLDR) Help() string {
-	return "/tldr {command} - explain command in tl;dr format"
+	return "/tldr {command} - Get a tl;dr explanation of a command"
 }
 
 // Prompts generate tldr prompt
