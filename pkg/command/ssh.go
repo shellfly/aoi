@@ -36,6 +36,9 @@ func (c *Ssh) Help() string {
 
 // Prompt set terminal prompt for ssh command
 func (c *Ssh) Prompt(p string) string {
+	if c.isFinished {
+		return p + ": "
+	}
 	return fmt.Sprintf("(/ssh %s) %s: ", c.host, p)
 }
 
@@ -45,6 +48,7 @@ func (c *Ssh) Init(input string) string {
 	index := strings.Index(input, " ")
 	if index == -1 {
 		if err := c.setHost(input); err == nil {
+			fmt.Println("connected to host, you can now ask for command line tasks")
 			c.isFinished = false
 		}
 		return ""
@@ -81,7 +85,7 @@ My question is how to %s on %s?
 	}
 }
 
-func (c *Ssh) Close() {
+func (c *Ssh) Finish() {
 	c.host = ""
 	c.initialized = false
 	c.isFinished = true

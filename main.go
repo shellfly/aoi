@@ -24,6 +24,8 @@ like we are good friend.
 `
 
 func main() {
+	startUp()
+
 	var model, openaiAPIKey string
 	flag.StringVar(&model, "model", "gpt-3.5-turbo", "model to use")
 	flag.StringVar(&openaiAPIKey, "openai_api_key", os.Getenv("OPENAI_API_KEY"), "OpenAI API key")
@@ -39,7 +41,9 @@ func main() {
 
 	// TODO: fix Chinese character
 	configDir := makeDir(".aoi")
+	userPrompt := "You"
 	rl, err := readline.NewEx(&readline.Config{
+		Prompt:      color.Yellow(userPrompt + ": "),
 		HistoryFile: filepath.Join(configDir, "history"),
 	})
 	if err != nil {
@@ -48,22 +52,19 @@ func main() {
 	}
 	defer rl.Close()
 
-	startUp()
 	var (
+		spinner = spinner.New(spinner.CharSets[11], 300*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
 		cmd     = command.Dummy()
 		prompts []string
 	)
 	for {
-		if cmd.IsFinished() {
-			rl.SetPrompt(color.Yellow("You: "))
-		} else {
-			rl.SetPrompt(color.Yellow(cmd.Prompt("You")))
-		}
-
 		input := getInput(rl, cmd)
+		rl.SetPrompt(color.Yellow(cmd.Prompt(userPrompt)))
 		if input == "" {
 			continue
 		}
+
+		fmt.Println(color.Green(cmd.Prompt("Aoi")))
 
 		if strings.HasPrefix(input, "/debug") {
 			fmt.Println("debug: ", ai.ToggleDebug())
@@ -74,6 +75,7 @@ func main() {
 		// to reuse it for prompts
 		if cmd.IsFinished() {
 			cmd, prompts = command.Parse(input)
+			rl.SetPrompt(color.Yellow(cmd.Prompt(userPrompt)))
 		} else {
 			prompts = cmd.Prompts(input)
 		}
@@ -82,17 +84,14 @@ func main() {
 		}
 
 		// Query AI for response
-		s := spinner.New(spinner.CharSets[11], 300*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
-		s.Start()
+		spinner.Start()
 		reply, err := ai.Query(prompts)
-		s.Stop()
+		spinner.Stop()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
-		// Show reply and pass reply for cmd to handle
-		fmt.Println(color.Green(cmd.Prompt("Aoi")))
 		fmt.Println(reply)
 		fmt.Println()
 		cmd.Handle(reply)
@@ -120,8 +119,10 @@ func getInput(rl *readline.Instance, cmd command.Command) string {
 			} else {
 				exit()
 			}
+		} else {
+			fmt.Println("Error reading input:", err)
 		}
-		fmt.Println("Error reading input:", err)
+		return ""
 	}
 	if input == "exit" || input == "quit" {
 		if !cmd.IsFinished() {
@@ -129,7 +130,9 @@ func getInput(rl *readline.Instance, cmd command.Command) string {
 		} else {
 			exit()
 		}
+		return ""
 	}
+
 	return input
 }
 
