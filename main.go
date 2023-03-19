@@ -13,9 +13,9 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/chzyer/readline"
 
-	"github.com/shellfly/codegpt/pkg/chatgpt"
-	"github.com/shellfly/codegpt/pkg/color"
-	"github.com/shellfly/codegpt/pkg/command"
+	"github.com/shellfly/aoi/pkg/chatgpt"
+	"github.com/shellfly/aoi/pkg/color"
+	"github.com/shellfly/aoi/pkg/command"
 )
 
 const system = `You are an AI assistant powered by ChatGPT, you have a little
@@ -32,7 +32,7 @@ func main() {
 	flag.StringVar(&openaiAPIKey, "openai_api_key", os.Getenv("OPENAI_API_KEY"), "OpenAI API key")
 	flag.Parse()
 
-	// Create an ai
+	// Create an AI
 	ai, err := chatgpt.NewAI(openaiAPIKey, model)
 	if err != nil {
 		fmt.Println("create ai error: ", err)

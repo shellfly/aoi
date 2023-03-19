@@ -64,7 +64,8 @@ func (c *Code) Handle(reply string) {
 
 // extractCode extract first markdown code snippet in text
 func extractCode(text string) string {
-	re := regexp.MustCompile("(?sm)^```" + ` ?\w*(.*?)` + "```$")
+	re := regexp.MustCompile("(?sm)```.*\n(.*)\n```.*")
+	//re := regexp.MustCompile("(?sm)^```" + `\w*(.*?)` + "```$")
 	matches := re.FindStringSubmatch(text)
 	if len(matches) > 0 {
 		return strings.TrimSpace(matches[1])

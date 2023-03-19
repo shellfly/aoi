@@ -57,7 +57,7 @@ func (ai *AI) limitTokens() {
 }
 
 func (ai *AI) Query(prompts []string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
 	for _, prompt := range prompts {
@@ -86,6 +86,9 @@ func (ai *AI) Query(prompts []string) (string, error) {
 
 func (ai *AI) ToggleDebug() bool {
 	ai.debug = !ai.debug
+	if ai.debug {
+		fmt.Println(ai.messages)
+	}
 	return ai.debug
 }
 

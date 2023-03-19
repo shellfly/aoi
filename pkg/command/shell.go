@@ -38,7 +38,7 @@ func (c *Shell) Prompts(input string) []string {
 
 	return []string{
 		fmt.Sprintf(`
-I want you to act as a terminal. I will ask you a question and you will reply with one-line command to do it, avoid pipeline if possible.
+I want you to act as a terminal. I will ask you a question and you will reply with one-line command to do it.
 I want you to only reply with the code, and nothing else. do not write explanations.
 My question is how to %s on %s?
 		`, input, getOSInfo()),
@@ -47,10 +47,10 @@ My question is how to %s on %s?
 
 // Handle execute shell command
 func (c *Shell) Handle(reply string) {
-	ExecCommand(reply)
+	ExecShell(reply)
 }
 
-func ExecCommand(command string) {
+func ExecShell(command string) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 	defer signal.Reset(os.Interrupt)
