@@ -39,9 +39,9 @@ func main() {
 	}
 	ai.SetSystem(system)
 
-	// TODO: fix Chinese character
 	configDir := makeDir(".aoi")
 	userPrompt := "You"
+	// TODO: fix Chinese character cursor
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:      color.Yellow(userPrompt + ": "),
 		HistoryFile: filepath.Join(configDir, "history"),
@@ -53,7 +53,7 @@ func main() {
 	defer rl.Close()
 
 	var (
-		spinner = spinner.New(spinner.CharSets[11], 300*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
+		spinner = spinner.New(spinner.CharSets[14], 200*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
 		cmd     = command.Dummy()
 		prompts []string
 	)
