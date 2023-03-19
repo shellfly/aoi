@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/briandowns/spinner"
 	"github.com/chzyer/readline"
 
@@ -53,9 +54,10 @@ func main() {
 	defer rl.Close()
 
 	var (
-		spinner = spinner.New(spinner.CharSets[14], 200*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
-		cmd     = command.Dummy()
-		prompts []string
+		spinner   = spinner.New(spinner.CharSets[14], 200*time.Millisecond, spinner.WithColor("green"), spinner.WithSuffix(" thinking..."))
+		cmd       = command.Dummy()
+		prompts   []string
+		lastReply string
 	)
 	for {
 		input := getInput(rl, cmd)
@@ -68,6 +70,14 @@ func main() {
 
 		if strings.HasPrefix(input, "/debug") {
 			fmt.Println("debug: ", ai.ToggleDebug())
+			continue
+		}
+		if strings.HasPrefix(input, "/copy") {
+			if err := clipboard.WriteAll(lastReply); err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("OK, copied")
+			}
 			continue
 		}
 
@@ -92,6 +102,7 @@ func main() {
 			continue
 		}
 
+		lastReply = reply
 		fmt.Println(reply)
 		fmt.Println()
 		cmd.Handle(reply)
