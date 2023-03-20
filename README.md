@@ -34,8 +34,11 @@ aoi
 ```
 
 ## Demos
-[![asciicast](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN.svg)](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN)
 
+### shell
+[![shell](/doc/shell.gif)](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN)
 
+### database
+[![pg](/doc/pg.gif)](https://asciinema.org/a/daDIFLigVJQLnd6U94VxyjHFD)
 ## Contributing
 If you find any issues with Aoi or have suggestions for new features, please feel free to create an issue or submit a pull request on the GitHub repository. Contributions from anyone and everyone are welcome!

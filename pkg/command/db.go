@@ -126,7 +126,7 @@ func (c *DB) ExecSQL(sql string) error {
 	// TODO: fix panic in rest-go/rest/pkg/sql
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("panic when query database:", r)
+			fmt.Println("panic when query database:", r, sql)
 			fmt.Println()
 		}
 	}()

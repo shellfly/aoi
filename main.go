@@ -65,11 +65,16 @@ func main() {
 		if input == "" {
 			continue
 		}
-		rl.SaveHistory(input)
+		_ = rl.SaveHistory(input)
 		fmt.Println(color.Green(cmd.Prompt("Aoi")))
 
 		if strings.HasPrefix(input, "/debug") {
 			fmt.Println("debug: ", ai.ToggleDebug())
+			continue
+		}
+		if strings.HasPrefix(input, "/reset") {
+			ai.Reset()
+			fmt.Println("reset")
 			continue
 		}
 		if strings.HasPrefix(input, "/copy") {

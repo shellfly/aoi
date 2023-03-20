@@ -30,7 +30,11 @@ aoi
 ```
 
 ## 演示
-[![asciicast](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN.svg)](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN)
+### shell
+[![shell](/doc/shell.gif)](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN)
+
+### database
+[![pg](/doc/pg.gif)](https://asciinema.org/a/daDIFLigVJQLnd6U94VxyjHFD)
 
 ## 贡献
 如果在使用 Aoi 时发现任何问题或有新功能的建议，请在 GitHub 存储库上创建问题或提交拉取请求。

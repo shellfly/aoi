@@ -92,6 +92,10 @@ func (ai *AI) ToggleDebug() bool {
 	return ai.debug
 }
 
+func (ai *AI) Reset() {
+	ai.messages = ai.messages[:1]
+}
+
 func NewMessage(role, text string) openai.ChatCompletionMessage {
 	return openai.ChatCompletionMessage{
 		Role:    role,
