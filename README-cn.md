@@ -8,7 +8,7 @@ Aoi 是由 ChatGPT 驱动的基于人工智能的对话代理程序。使用 Aoi
  Aoi 可以用作 ChatGPT 的终端版本，此外，Aoi 还带有几个内置功能提高使用效率：
 
 - `/code` - 生成代码片段并复制到剪贴板，例如 `/code go generate random numbers`
-- `/db` - 生成 SQL 并在数据库上执行，例如 `/db postgres://user:passwd@host/db list tables`
+- `/db` - 自动导入数据库表结构，生成 SQL 并在数据库上执行，例如 `/db postgres://user:passwd@host/db list tables`
 - `/shell` - 生成 shell 命令并执行，例如 `/shell view listening ports`
 - `/ssh` - 生成远程 shell 命令并执行，例如 `/ssh {host} view listening tcp ports`
 - `/tldr` - 获取命令的 tl;dr 格式的解释
