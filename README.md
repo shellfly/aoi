@@ -10,9 +10,9 @@ Ghost in the Shell powered by ChatGPT
 ## Features
 You can use Aoi as a terminal version of ChatGPT, Besides, Aoi comes with several built-in features that can help you be more productive:
 
-- `/code` - Generate code snippets and copy them to the clipboard, e.g. `/code go generate random numbers`
-- `/db` - Generate SQL and execute it on the database, e.g. `/db postgres://user:passwd@host/db list tables`
-- `/shell` - Generate shell command and execute it, e.g. `/shell view listening ports`
+- `/code` - Generate code snippets and **auto copy** them to the clipboard, e.g. `/code go generate random numbers`
+- `/db` - **Auto load database schema** and **execute SQL**, e.g. `/db postgres://user:passwd@host/db list tables`
+- `/shell` - Generate shell command and **execute it**, e.g. `/shell view listening ports`
 - `/ssh` - Generate shell command and execute it on the remote host, e.g. `/ssh {host} view listening tcp ports`
 - `/tldr` - Get a tl;dr explanation of a command
 - `/trans` - Translate text to a specified language
