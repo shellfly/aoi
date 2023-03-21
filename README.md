@@ -39,6 +39,6 @@ aoi
 [![shell](/doc/shell.gif)](https://asciinema.org/a/XjCGaMNf8Qp2nQ1UDlehjm5AN)
 
 ### database
-[![pg](/doc/pg.gif)](https://asciinema.org/a/daDIFLigVJQLnd6U94VxyjHFD)
+[![pg](/doc/pg.gif)](https://asciinema.org/a/568712)
 ## Contributing
 If you find any issues with Aoi or have suggestions for new features, please feel free to create an issue or submit a pull request on the GitHub repository. Contributions from anyone and everyone are welcome!
