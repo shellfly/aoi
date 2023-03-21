@@ -138,13 +138,15 @@ func (c *DB) ExecSQL(sql string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	columns := make([]string, 0, len(data[0]))
 	for k := range data[0] {
 		fmt.Fprintf(w, "%s\t", k)
+		columns = append(columns, k)
 	}
 	fmt.Fprintln(w, "")
 	for _, r := range data {
-		for _, v := range r {
-			fmt.Fprintf(w, "%v\t", v)
+		for _, column := range columns {
+			fmt.Fprintf(w, "%v\t", r[column])
 		}
 		fmt.Fprintln(w, "")
 	}

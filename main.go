@@ -117,6 +117,17 @@ func startUp() {
  /|  .
 /-|()|   
 	`)
+	hour := time.Now().Hour()
+	greet := ""
+	if hour < 12 {
+		greet = "Good morning"
+	} else if hour < 18 {
+		greet = "Good afternoon"
+	} else {
+		greet = "Good evening"
+	}
+	fmt.Printf("%s, it's great to see you again\n", greet)
+	fmt.Println("Type /help to see some shortcuts")
 }
 
 func exit() {
