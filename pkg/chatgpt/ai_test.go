@@ -9,7 +9,7 @@ import (
 )
 
 func TestAI(t *testing.T) {
-	ai, err := NewAI("api key", "model")
+	ai, err := NewAI("https:...", "api key", "model")
 	assert.Nil(t, err)
 	t.Run("limit tokens", func(t *testing.T) {
 		ai.messages = make([]openai.ChatCompletionMessage, MessageLimit+2)

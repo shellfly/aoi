@@ -27,13 +27,14 @@ like we are good friend.
 func main() {
 	startUp()
 
-	var model, openaiAPIKey string
-	flag.StringVar(&model, "model", "gpt-3.5-turbo", "model to use")
+	var model, openaiAPIKey, openaiAPIBaseUrl string
+	flag.StringVar(&openaiAPIBaseUrl, "openai_api_base_url", os.Getenv("OPENAI_API_BASE_URL"), "OpenAI API Base Url, default: https://api.openai.com")
 	flag.StringVar(&openaiAPIKey, "openai_api_key", os.Getenv("OPENAI_API_KEY"), "OpenAI API key")
+	flag.StringVar(&model, "model", "gpt-3.5-turbo", "model to use")
 	flag.Parse()
 
 	// Create an AI
-	ai, err := chatgpt.NewAI(openaiAPIKey, model)
+	ai, err := chatgpt.NewAI(openaiAPIBaseUrl, openaiAPIKey, model)
 	if err != nil {
 		fmt.Println("create ai error: ", err)
 		return
