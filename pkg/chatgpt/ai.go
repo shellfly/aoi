@@ -22,13 +22,17 @@ type AI struct {
 	debug bool
 }
 
-func NewAI(apiKey, model string) (*AI, error) {
+func NewAI(apiBaseUrl, apiKey, model string) (*AI, error) {
 	if apiKey == "" {
 		return nil, errors.New("Please set the OPENAI_API_KEY environment variable")
 	}
 
 	// Create a new OpenAI API client with the provided API key
-	client := openai.NewClient(apiKey)
+	config := openai.DefaultConfig(apiKey)
+	if apiBaseUrl != "" {
+		config.BaseURL = apiBaseUrl + "/v1"
+	}
+	client := openai.NewClientWithConfig(config)
 	messages := make([]openai.ChatCompletionMessage, 2*MessageLimit)
 	ai := &AI{
 		client:   client,

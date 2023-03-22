@@ -32,6 +32,12 @@ Set your OpenAI API key as an environment variable, and then run the `aoi` comma
 export OPENAI_API_KEY=<your_api_key>
 aoi
 ```
+If necessary, you can also customize the OpenAI API BASE URL as an environment variable.
+
+```bash
+
+export OPENAI_API_BASE_URL=<your_custom_api_base_url>
+```
 
 ## Demos
 

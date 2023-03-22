@@ -28,6 +28,12 @@ go install github.com/shellfly/aoi@latest
 export OPENAI_API_KEY=<your_api_key>
 aoi
 ```
+如有需要，也可自定义 OpenAI API BASE URL 为环境变量。
+
+```bash
+
+export OPENAI_API_BASE_URL=<your_custom_api_base_url>
+```
 
 ## 演示
 ### shell
