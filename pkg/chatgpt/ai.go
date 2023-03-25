@@ -33,7 +33,7 @@ func NewAI(apiBaseUrl, apiKey, model string) (*AI, error) {
 		config.BaseURL = apiBaseUrl + "/v1"
 	}
 	client := openai.NewClientWithConfig(config)
-	messages := make([]openai.ChatCompletionMessage, 2*MessageLimit)
+	messages := make([]openai.ChatCompletionMessage, 0, 2*MessageLimit)
 	ai := &AI{
 		client:   client,
 		model:    model,
