@@ -6,7 +6,7 @@ import (
 )
 
 // https://en.wikipedia.org/wiki/IETF_language_tag
-var languages = map[string]string{
+var Languages = map[string]string{
 	"ar":      "Arabic",
 	"cn":      "Chinese",
 	"de":      "German",
@@ -49,7 +49,7 @@ func (c *Trans) Prompts(input string) []string {
 	}
 
 	lang, text := input[:index], input[index+1:]
-	if fullName, ok := languages[lang]; ok {
+	if fullName, ok := Languages[lang]; ok {
 		lang = fullName
 	}
 	return []string{
