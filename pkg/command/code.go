@@ -54,7 +54,10 @@ func (c *Code) Prompts(input string) []string {
 
 // Handle copy code in the reply to clipboard, and return the original reply
 func (c *Code) Handle(reply string) {
-	code := extractCode(reply)
+	code := reply
+	if strings.Contains(reply, "```") {
+		code = extractCode(reply)
+	}
 	fmt.Println(code)
 	fmt.Println()
 	if code != "" {
