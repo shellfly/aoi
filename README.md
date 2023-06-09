@@ -3,9 +3,9 @@
 
 [中文说明](/README-cn.md)
 
-Ghost in the Shell powered by ChatGPT
+Ghost in the Shell powered by OpenAI.
 
-**Aoi** is an AI-based conversational agent powered by ChatGPT. With Aoi, you can have natural language conversations with an AI in the terminal that can understand your queries and execute appropriate commands.
+With Aoi, you can have natural language conversations with an AI in the terminal that can understand your queries and execute appropriate commands.
 
 ## Features
 You can use Aoi as a terminal version of ChatGPT, Besides, Aoi comes with several built-in features that can help you be more productive:
@@ -26,17 +26,29 @@ You can download Aoi from the GitHub [release page](https://github.com/shellfly/
 go install github.com/shellfly/aoi@latest
 ```
 
+### OpenAI API Key
 Set your OpenAI API key as an environment variable, and then run the `aoi` command.
 
 ```bash
-export OPENAI_API_KEY=<your_api_key>
+export OPENAI_API_KEY={your_api_key}
+
 aoi
 ```
-If necessary, you can also customize the OpenAI API BASE URL as an environment variable.
+
+### OpenAI API Base URL
+If needed, you can also customize the OpenAI API BASE URL as an environment variable.
 
 ```bash
+export OPENAI_API_BASE_URL={your_custom_api_base_url}
+```
 
-export OPENAI_API_BASE_URL=<your_custom_api_base_url>
+### Azure OpenAI
+Set Azure environment variables and pass the `azure.deployment` to use Azure OpenAI service
+```
+export OPENAI_API_KEY={azure openai secret}
+export OPENAI_API_BASE_URL={azure openai endpoint}
+
+aoi -azure.deployment {model deployment name}
 ```
 
 ## Demos

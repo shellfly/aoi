@@ -1,8 +1,8 @@
 # Aoi (葵)
 
-由 ChatGPT 驱动的 Ghost in the Shell
+由 OpenAI 驱动的 Ghost in the Shell
 
-Aoi 是由 ChatGPT 驱动的基于人工智能的对话代理程序。使用 Aoi，可以在终端中与 AI 进行自然语言对话，它能够理解您的查询并执行适当的命令。
+使用 Aoi，可以在终端中与 AI 进行自然语言对话，它能够理解您的查询并执行适当的命令。
 
 ## 功能
  Aoi 可以用作 ChatGPT 的终端版本，此外，Aoi 还带有几个内置功能提高使用效率：
@@ -21,18 +21,31 @@ Aoi 是由 ChatGPT 驱动的基于人工智能的对话代理程序。使用 Aoi
 ```bash
 go install github.com/shellfly/aoi@latest
 ```
+### OpenAI API Key
 将 OpenAI API 密钥设置为环境变量，然后运行 aoi 命令。
 
 ```bash
 
 export OPENAI_API_KEY=<your_api_key>
+
 aoi
 ```
+
+### OpenAI API Base URL
 如有需要，也可自定义 OpenAI API BASE URL 为环境变量。
 
 ```bash
-
 export OPENAI_API_BASE_URL=<your_custom_api_base_url>
+```
+
+### Azure OpenAI
+使用Azure的环境变量，并且传递`azure.deployment`参数来使用Azure OpenAI 服务
+
+```
+export OPENAI_API_KEY={azure openai secret}
+export OPENAI_API_BASE_URL={azure openai endpoint}
+
+aoi -azure.deployment {model deployment name}
 ```
 
 ## 演示
