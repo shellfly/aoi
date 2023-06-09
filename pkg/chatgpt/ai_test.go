@@ -9,8 +9,8 @@ import (
 )
 
 func TestAI(t *testing.T) {
-	ai, err := NewAI("https:...", "api key", "model")
-	assert.Nil(t, err)
+	client := openai.NewClient("api key")
+	ai := NewAI(client, "model")
 	t.Run("limit tokens", func(t *testing.T) {
 		ai.messages = make([]openai.ChatCompletionMessage, MessageLimit+2)
 		ai.messages[0] = NewMessage("system", "message")

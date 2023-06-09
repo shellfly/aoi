@@ -2,7 +2,6 @@ package chatgpt
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -22,17 +21,7 @@ type AI struct {
 	debug bool
 }
 
-func NewAI(apiBaseUrl, apiKey, model string) (*AI, error) {
-	if apiKey == "" {
-		return nil, errors.New("Please set the OPENAI_API_KEY environment variable")
-	}
-
-	// Create a new OpenAI API client with the provided API key
-	config := openai.DefaultConfig(apiKey)
-	if apiBaseUrl != "" {
-		config.BaseURL = apiBaseUrl + "/v1"
-	}
-	client := openai.NewClientWithConfig(config)
+func NewAI(client *openai.Client, model string) *AI {
 	messages := make([]openai.ChatCompletionMessage, 0, 2*MessageLimit)
 	ai := &AI{
 		client:   client,
@@ -40,8 +29,9 @@ func NewAI(apiBaseUrl, apiKey, model string) (*AI, error) {
 		messages: messages,
 		debug:    false,
 	}
-	return ai, nil
+	return ai
 }
+
 func (ai *AI) SetSystem(system string) {
 	ai.system = system
 	ai.messages = []openai.ChatCompletionMessage{NewMessage(openai.ChatMessageRoleSystem, system)}
@@ -70,7 +60,11 @@ func (ai *AI) Query(prompts []string) (string, error) {
 	ai.limitTokens()
 
 	if ai.debug {
-		fmt.Println(ai.messages)
+		fmt.Println("---debug---")
+		for _, msg := range ai.messages {
+			fmt.Println(msg)
+		}
+		fmt.Println("---debug---")
 	}
 	// Set the request parameters for the completion API
 	req := openai.ChatCompletionRequest{

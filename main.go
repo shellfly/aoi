@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +14,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/briandowns/spinner"
 	"github.com/chzyer/readline"
+	"github.com/sashabaranov/go-openai"
 
 	"github.com/shellfly/aoi/pkg/chatgpt"
 	"github.com/shellfly/aoi/pkg/color"
@@ -24,21 +27,45 @@ the character laughing man who named Aoi, so you named yourself Aoi. Respond
 like we are good friend.
 `
 
-func main() {
-	startUp()
-
+func InitClient() (*openai.Client, string, error) {
 	var model, openaiAPIKey, openaiAPIBaseUrl string
+	var azureDeployment string
 	flag.StringVar(&openaiAPIBaseUrl, "openai_api_base_url", os.Getenv("OPENAI_API_BASE_URL"), "OpenAI API Base Url, default: https://api.openai.com")
 	flag.StringVar(&openaiAPIKey, "openai_api_key", os.Getenv("OPENAI_API_KEY"), "OpenAI API key")
 	flag.StringVar(&model, "model", "gpt-3.5-turbo", "model to use")
+	flag.StringVar(&azureDeployment, "azure.deployment", "", "azure deployment name of the model")
 	flag.Parse()
 
-	// Create an AI
-	ai, err := chatgpt.NewAI(openaiAPIBaseUrl, openaiAPIKey, model)
-	if err != nil {
-		fmt.Println("create ai error: ", err)
-		return
+	if openaiAPIKey == "" {
+		return nil, "", errors.New("Please set the OPENAI_API_KEY environment variable")
 	}
+
+	var config openai.ClientConfig
+	if azureDeployment != "" {
+		if openaiAPIBaseUrl == "" {
+			return nil, "", errors.New("Please set the OPENAI_API_BASE_URL to your azure endpoint")
+		}
+		config = openai.DefaultAzureConfig(openaiAPIKey, openaiAPIBaseUrl)
+		config.AzureModelMapperFunc = func(model string) string {
+			return azureDeployment
+		}
+	} else {
+		config = openai.DefaultConfig(openaiAPIKey)
+		if openaiAPIBaseUrl != "" {
+			config.BaseURL = openaiAPIBaseUrl
+		}
+	}
+	client := openai.NewClientWithConfig(config)
+	return client, model, nil
+}
+
+func main() {
+	startUp()
+	client, model, err := InitClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ai := chatgpt.NewAI(client, model)
 	ai.SetSystem(system)
 
 	configDir := makeDir(".aoi")
@@ -90,6 +117,7 @@ func main() {
 		// If previous is finished try to create a new one, otherwise continue
 		// to reuse it for prompts
 		if cmd.IsFinished() {
+			ai.Reset()
 			cmd, prompts = command.Parse(input)
 			rl.SetPrompt(color.Yellow(cmd.Prompt(userPrompt)))
 		} else {

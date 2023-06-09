@@ -8,7 +8,7 @@ require (
 	github.com/chzyer/readline v1.5.1
 	github.com/kevinburke/ssh_config v1.2.0
 	github.com/rest-go/rest v0.1.3
-	github.com/sashabaranov/go-openai v1.5.2
+	github.com/sashabaranov/go-openai v1.10.1
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/crypto v0.7.0
 )
