@@ -14,7 +14,8 @@ You can use Aoi as a terminal version of ChatGPT, Besides, Aoi comes with severa
 - `/db` - **Auto load database schema** and **execute SQL**, e.g. `/db postgres://user:passwd@host/db list tables`
 - `/shell` - Generate shell command and **execute it**, e.g. `/shell view listening ports`
 - `/ssh` - Generate shell command and execute it on the remote host, e.g. `/ssh {host} view listening tcp ports`
-- `/tldr` - Get a tl;dr explanation of a command
+- `/summary` - Generate a summary of the content from a URL, and translate it if needed e.g. `/summary {url}` `/summary cn {url}`
+- `/tldr` - Get a tl;dr explanation of a shell command
 - `/trans` - Translate text to a specified language
 - `/copy` - Copy the last reply
 

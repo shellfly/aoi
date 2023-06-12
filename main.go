@@ -117,7 +117,10 @@ func main() {
 		// If previous is finished try to create a new one, otherwise continue
 		// to reuse it for prompts
 		if cmd.IsFinished() {
-			ai.Reset()
+			if cmd.Name() == "summary" {
+				// summary has too many tokens, so we'd better to reset messages
+				ai.Reset()
+			}
 			cmd, prompts = command.Parse(input)
 			rl.SetPrompt(color.Yellow(cmd.Prompt(userPrompt)))
 		} else {
