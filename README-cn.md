@@ -10,7 +10,8 @@
 - `/code` - 生成代码片段并复制到剪贴板，例如 `/code go generate random numbers`
 - `/db` - 自动导入数据库表结构，生成 SQL 并在数据库上执行，例如 `/db postgres://user:passwd@host/db list tables`
 - `/shell` - 生成 shell 命令并执行，例如 `/shell view listening ports`
-- `/ssh` - 生成远程 shell 命令并执行，例如 `/ssh {host} view listening tcp ports`
+- `/ssh` - 生成远程 shell 命令并执行，例如 `/ssh {host} view listening tcp ports`\
+- `/summary` - 对URL内容进行总结，在指定语音的情况下翻译输出的内容`/summary {url}` `/summary cn {url}`
 - `/tldr` - 获取命令的 tl;dr 格式的解释
 - `/trans` - 将文本翻译为指定语言
 - `/copy` - 复制上一条回复
