@@ -8,17 +8,14 @@ on:
 
 jobs:
     codecov:
-        strategy:
-            matrix:
-                go-version: [1.21]
-                platform: [ubuntu-latest]
-      
-        runs-on: ${{ matrix.platform }}
+        name: Test
+        runs-on: ubuntu-20.04
 
         steps:
         -   uses: actions/setup-go@v4
             with:
-                ${{ matrix.go-version }}
+                go-version: '1.21'
+                cache: false
         -   uses: actions/checkout@v3
 
         -   name: Test
