@@ -1,0 +1,34 @@
+name: codecov
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+jobs:
+    codecov:
+        strategy:
+            matrix:
+                go-version: [1.21.x]
+                platform: [ubuntu-20.04]
+      
+        runs-on: ${{ matrix.platform }}
+
+        steps:
+        -   name: Install GO
+            uses: actions/setup-go@v4
+            with:
+                ${{ matrix.go-version }}
+
+        -   name: checkout code
+            uses: actions/checkout@v3
+
+        -   name: Test
+            run: go test -shuffle=on -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+        -   name: Vet
+            run: go vet ./...
+
+        -   name: Codecov
+            run: bash <(curl -s https://codecov.io/bash)
