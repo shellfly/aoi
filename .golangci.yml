@@ -1,0 +1,175 @@
+### Config GolangCI
+
+# Options for analysis running.
+run:
+  # The default concurrency value is the number of available CPU.
+  concurrency: 2
+
+  # Timeout for analysis, e.g. 30s, 5m.
+  # Default: 1m
+  timeout: 5m
+
+  # Exit code when at least one issue was found.
+  # Default: 1
+  issues-exit-code: 2
+
+  # Include test files or not.
+  # Default: true
+  tests: false
+
+  # If set we pass it to "go list -mod={option}". From "go help modules":
+  # If invoked with -mod=readonly, the go command is disallowed from the implicit
+  # automatic updating of go.mod described above. Instead, it fails when any changes
+  # to go.mod are needed. This setting is most useful to check that go.mod does
+  # not need updates, such as in a continuous integration and testing system.
+  # If invoked with -mod=vendor, the go command assumes that the vendor
+  # directory holds the correct copies of dependencies and ignores
+  # the dependency descriptions in go.mod.
+  #
+  # Allowed values: readonly|vendor|mod
+  # By default, it isn't set.
+  modules-download-mode: readonly
+
+  # Allow multiple parallel golangci-lint instances running.
+  # If false (default) - golangci-lint acquires file lock on start.
+  allow-parallel-runners: false
+
+  # Define the Go version limit.
+  # Mainly related to generics support since go1.18.
+  # Default: use Go version from the go.mod file, fallback on the env var `GOVERSION`, fallback on 1.18
+  go: '1.18'
+
+
+# output configuration options
+output:
+  # Format: colored-line-number|line-number|json|colored-tab|tab|checkstyle|code-climate|junit-xml|github-actions|teamcity
+  #
+  # Multiple can be specified by separating them by comma, output can be provided
+  # for each of them by separating format name and path by colon symbol.
+  # Output path can be either `stdout`, `stderr` or path to the file to write to.
+  # Example: "checkstyle:report.xml,json:stdout,colored-line-number"
+  #
+  # Default: colored-line-number
+  format: json
+
+    # Print lines of code with issue.
+  # Default: true
+  print-issued-lines: false
+  # Print linter name in the end of issue text.
+  # Default: true
+  print-linter-name: false
+  # Make issues output unique by line.
+  # Default: true
+  uniq-by-line: false
+  # Add a prefix to the output file references.
+  # Default is no prefix.
+  path-prefix: ""
+  # Sort results by: filepath, line and column.
+  sort-results: false
+
+linters:
+  # Disable all linters.
+  # Default: false
+  disable-all: false
+
+  # Enable all available linters.
+  # Default: false
+  enable-all: false
+
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - unused
+    - asciicheck
+    - bidichk
+    - containedctx
+    - cyclop
+    - decorder
+    - depguard
+    - dupl
+    - dupword
+    - execinquery
+    - exhaustruct
+    - goconst
+    - gosec
+    - interfacebloat
+    - misspell
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - usestdlibvars
+
+  # Run only fast linters from enabled linters set (first run won't be fast)
+  # Default: false
+  fast: true
+
+
+linters-settings:
+  cyclop:
+    # The maximal average package complexity.
+    # If it's higher than 0.0 (float) the check is enabled
+    # Default: 0.0
+    package-average: 0.5
+    # Should ignore tests.
+    # Default: false
+    skip-tests: true
+
+  decorder:
+    # Required order of `type`, `const`, `var` and `func` declarations inside a file.
+    # Default: types before constants before variables before functions.
+    dec-order:
+      - type
+      - const
+      - var
+      - func
+    # If true, underscore vars (vars with "_" as the name) will be ignored at all checks
+    # Default: false (underscore vars are not ignored)
+    ignore-underscore-vars: false
+    # If true, order of declarations is not checked at all.
+    # Default: true (disabled)
+    disable-dec-order-check: false
+    # If true, `init` func can be anywhere in file (does not have to be declared before all other functions).
+    # Default: true (disabled)
+    disable-init-func-first-check: false
+    # If true, multiple global `type`, `const` and `var` declarations are allowed.
+    # Default: true (disabled)
+    disable-dec-num-check: false
+    # If true, type declarations will be ignored for dec num check
+    # Default: false (type statements are not ignored)
+    disable-type-dec-num-check: false
+    # If true, const declarations will be ignored for dec num check
+    # Default: false (const statements are not ignored)
+    disable-const-dec-num-check: false
+    # If true, var declarations will be ignored for dec num check
+    # Default: false (var statements are not ignored)
+    disable-var-dec-num-check: false
+
+  dupl:
+    # Tokens count to trigger issue.
+    # Default: 150
+    threshold: 150
+
+  dupword:
+    # Keywords for detecting duplicate words.
+    # If this list is not empty, only the words defined in this list will be detected.
+    # Default: []
+    keywords:
+      - "the"
+      - "and"
+      - "a"
+    # Keywords used to ignore detection.
+    # Default: []
+    ignore:
+      - "0C0C"
+
+  exhaustivestruct:
+    # Struct Patterns is list of expressions to match struct packages and names.
+    # The struct packages have the form `example.com/package.ExampleStruct`.
+    # The matching patterns can use matching syntax from https://pkg.go.dev/path#Match.
+    # If this list is empty, all structs are tested.
+    # Default: []
+    struct-patterns:
+      - '*.Test'
+      - 'example.com/package.ExampleStruct'
