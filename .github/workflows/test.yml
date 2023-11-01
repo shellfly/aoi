@@ -7,22 +7,16 @@ on:
     pull_request:
 
 jobs:
-    codecov:
-        name: Test
-        runs-on: ubuntu-20.04
-
+    build:
+        runs-on: ubuntu-latest
         steps:
+        -   uses: actions/checkout@v4
         -   uses: actions/setup-go@v4
             with:
-                go-version: '1.21'
-                cache: false
-        -   uses: actions/checkout@v3
-
-        -   name: Test
-            run: go test -shuffle=on -race -coverprofile=coverage.txt -covermode=atomic ./...
-
-        -   name: Vet
-            run: go vet ./...
-
-        -   name: Codecov
-            run: bash <(curl -s https://codecov.io/bash)
+                go-version: 'stable'
+        -   name: Run coverage
+            run: go test -race -coverprofile=coverage.txt -covermode=atomic
+        -   name: Upload coverage to Codecov
+            uses: codecov/codecov-action@v3
+            env:
+                CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
