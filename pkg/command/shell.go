@@ -11,6 +11,12 @@ import (
 	"syscall"
 )
 
+const (
+	WINDOWS_OS = "windows"
+	LINUX_OS   = "linux"
+	MAC_OS     = "darwin"
+)
+
 func init() {
 	commands["shell"] = &Shell{}
 }
@@ -57,7 +63,7 @@ func ExecShell(command string) {
 	fmt.Println(command)
 	fmt.Println()
 	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == WINDOWS_OS {
 		cmd = exec.Command("cmd", "/C", command)
 	} else {
 		cmd = exec.Command("bash", "-c", command)
@@ -80,7 +86,7 @@ func ExecShell(command string) {
 	case <-done:
 		return
 	case <-sigChan:
-		if runtime.GOOS == "windows" {
+		if runtime.GOOS == WINDOWS_OS {
 			_ = cmd.Process.Signal(os.Kill)
 		} else {
 			_ = syscall.Kill(cmd.Process.Pid, syscall.SIGINT)
@@ -92,11 +98,11 @@ func ExecShell(command string) {
 func getOSInfo() string {
 	var version string
 	switch runtime.GOOS {
-	case "darwin":
+	case MAC_OS:
 		version = darwinVersion()
-	case "linux":
+	case LINUX_OS:
 		version = linuxVersion()
-	case "windows":
+	case WINDOWS_OS:
 		version = windowsVersion()
 	}
 	return fmt.Sprintf("%s %s", runtime.GOOS, version)

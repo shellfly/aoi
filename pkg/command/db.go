@@ -16,8 +16,6 @@ func init() {
 }
 
 type DB struct {
-	dummyCommand
-
 	dbType      string
 	db          *sql.DB
 	isFinished  bool
