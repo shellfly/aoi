@@ -17,8 +17,6 @@ func init() {
 }
 
 type Ssh struct {
-	dummyCommand
-
 	client      *ssh.Client
 	host        string
 	osInfo      string

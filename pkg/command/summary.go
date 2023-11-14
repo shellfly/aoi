@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -44,8 +45,14 @@ func (c *Summary) Prompts(input string) []string {
 	return []string{prompt}
 }
 
-func crawl(url string) string {
-	resp, err := http.Get(url)
+func crawl(url_input string) string {
+	// Validate the URL
+	if _, err := url.ParseRequestURI(url_input); err != nil {
+		fmt.Println("Invalid URL: ", err)
+		return ""
+	}
+
+	resp, err := http.Get(url_input)
 	if err != nil {
 		fmt.Println("Error fetching URL: ", err)
 		return ""
